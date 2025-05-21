@@ -1,63 +1,77 @@
-# Docker Multi Container Cheat Sheet
+# 🐳 Docker Multi-Container Cheat Sheet
 
-### Docker Network
+## 🔗 Docker Network
 
-<aside>
-💡
-
+```bash
 docker network create ts-docker-net
+```
 
-</aside>
+---
 
-### No Image Build Needed For Mongo. Just Pull it From DockerHub
+## 🍃 MongoDB Container (No Dockerfile Needed)
 
-### Mongo DB Container
+> Pulls directly from DockerHub
 
-<aside>
-💡
+```bash
+docker run --name mongodb \
+  --rm \
+  -v ts-docker-db:/data/db \
+  --network ts-docker-net \
+  -e MONGO_INITDB_ROOT_USERNAME=ts-docker \
+  -e MONGO_INITDB_ROOT_PASSWORD=ts-docker \
+  mongo
+```
 
-> docker run --name mongodb --rm -v ts-docker-db:/data/db --network ts-docker-net -e MONGO_INITDB_ROOT_USERNAME=ts-docker -e MONGO_INITDB_ROOT_PASSWORD=ts-docker mongo
-> 
-</aside>
+---
 
-### No Dockerfile Needed
+## 🚀 Node.js/Express Backend
 
-### Node Express/Backend Image
+### 🔨 Build Backend Image
 
-<aside>
-💡
+```bash
+docker build -t ts-docker-backend:v5 .
+```
 
-docker build -t ts-docker-bakcend:v5 .
+### 🧱 Run Backend Container
 
-</aside>
+```bash
+docker run --name ts-docker-backend-container \
+  --rm \
+  --network ts-docker-net \
+  --env-file .env \
+  -w /app \
+  -v ts-docker-logs:/app/logs \
+  -v "$(pwd)":/app \
+  -v /app/node_modules \
+  -p 5000:5000 \
+  ts-docker-backend:v5
+```
 
-### Node-Express/Backend Container
+📄 [Dockerfile for Node.js Backend](https://www.notion.so/Dockerfile-Nodejs-1fa8dff2056281eb8c0cc72d0b39d2ae?pvs=21)
 
-<aside>
-💡
+---
 
-> docker run --name ts-docker-backend-container --rm --network ts-docker-net --env-file .env -w //app -v ts-docker-logs://app/logs -v "//$(pwd)"://app -v //app/node_modules -p 5000:5000 ts-docker-backend:v5
-> 
-</aside>
+## ⚛️ Next.js / React Frontend
 
-[Dockerfile [Nodejs]](https://www.notion.so/Dockerfile-Nodejs-1fa8dff2056281eb8c0cc72d0b39d2ae?pvs=21)
+### 🔨 Build Frontend Image
 
-### NextJS/React/Frontend Image
-
-<aside>
-💡
-
+```bash
 docker build -t ts-docker-frontend:v5 .
+```
 
-</aside>
+### 🧱 Run Frontend Container
 
-### NextJS/React/Frontend Container
+```bash
+docker run --name ts-docker-frontend-container \
+  --rm \
+  -p 3000:3000 \
+  --env-file .env.local \
+  -w /app \
+  -v "$(pwd)":/app \
+  -v /app/node_modules \
+  --network ts-docker-net \
+  -e WATCHPACK_POLLING=true \
+  ts-docker-frontend:v5
+```
 
-<aside>
-💡
-
-> docker run --name ts-docker-frontend-conatiner --rm -p 3000:3000 --env-file .env.local -w //app -v "//$(pwd)"://app -v //app/node_modules --network ts-docker-net -e WATCHPACK_POLLING=true ts-docker-frontend:v5
-> 
-</aside>
-
-[Dockerfile [NextJS/React/Frontend]](https://www.notion.so/Dockerfile-NextJS-React-Frontend-1fa8dff2056281aaba18dc9cc43cd006?pvs=21)
+📄 [Dockerfile for Next.js/React Frontend](https://www.notion.so/Dockerfile-NextJS-React-Frontend-1fa8dff2056281aaba18dc9cc43cd006?pvs=21)
